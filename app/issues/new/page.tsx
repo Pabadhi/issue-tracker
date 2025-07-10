@@ -8,8 +8,9 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation'; // Correct import for useRouter
 import {zodResolver} from '@hookform/resolvers/zod';
 import { createIssueSchema } from '@/app/api/issues/validation'; // Import the validation schema
-import { z } from 'zod'; // Import zod for validation schema
+import { set, z } from 'zod'; // Import zod for validation schema
 import ErrorMessage from '@/app/components/ErrorMessage';
+import Spinner from '@/app/components/Spinner'; // Import Spinner component
 // Import SimpleMDE styles
 
 type IssueForm = z.infer<typeof createIssueSchema>; // Define the form type based on the schema
@@ -17,6 +18,7 @@ type IssueForm = z.infer<typeof createIssueSchema>; // Define the form type base
 const NewIssuePage = () => {
     const router = useRouter();
     const [error,setError ]= useState<string | null>(null);
+    const [submitting, setSubmitting] = useState(false); // State to manage submission status
     const {register, control, handleSubmit, formState: { errors }} = useForm<IssueForm>(
         {
             resolver: zodResolver(createIssueSchema),
@@ -33,10 +35,12 @@ const NewIssuePage = () => {
         )}
     <form onSubmit={handleSubmit(async (data) => {
         try {
+            setSubmitting(true); // Set submitting state to true
             await axios.post('/api/issues', data);
             router.push('/issues'); // Redirect to the issues page after submission
 
         } catch (error) {
+            setSubmitting(false); // Reset submitting state
             setError('Failed to create issue. Please try again.'); // Set error message
         }
     })}>
@@ -67,7 +71,7 @@ const NewIssuePage = () => {
     </Box>
     </Flex>
 
-    <Button mt="4">Submit Issue</Button>
+    <Button disabled={submitting} mt="4">Submit Issue {submitting && <Spinner />}</Button>
 
     </form>
     </div>
