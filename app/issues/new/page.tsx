@@ -1,61 +1,72 @@
 'use client';
-import { TextField, TextArea, Box ,Flex,Button, Callout} from '@radix-ui/themes'; // Import TextArea
+import { TextField, TextArea, Box ,Flex,Button, Callout, Text} from '@radix-ui/themes'; // Import Text here!
 import React, { useState } from 'react';
 import SimpleMDE from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import { useForm ,Controller} from 'react-hook-form';
 import axios from 'axios';
-import { useRouter } from 'next/dist/client/components/navigation';
+import { useRouter } from 'next/navigation'; // Correct import for useRouter
+import {zodResolver} from '@hookform/resolvers/zod';
+import { createIssueSchema } from '@/app/api/issues/validation'; // Import the validation schema
+import { z } from 'zod'; // Import zod for validation schema
 // Import SimpleMDE styles
 
-interface IssueForm {
-    title: string;
-    description: string;
-    }
+type IssueForm = z.infer<typeof createIssueSchema>; // Define the form type based on the schema
 
 const NewIssuePage = () => {
     const router = useRouter();
     const [error,setError ]= useState<string | null>(null);
-    const {register, control, handleSubmit} = useForm<IssueForm>();
-    
+    const {register, control, handleSubmit, formState: { errors }} = useForm<IssueForm>(
+        {
+            resolver: zodResolver(createIssueSchema),
+        }
+    );
+
   return (
+
     <div>
-        {error && <Callout.Root color='red'>
+        {error && (
+          <Callout.Root color='red' mt="2"> {/* Added margin-top for spacing */}
             <Callout.Text>{error}</Callout.Text>
-            </Callout.Root>}
+          </Callout.Root>
+        )}
     <form onSubmit={handleSubmit(async (data) => {
         try {
             await axios.post('/api/issues', data);
             router.push('/issues'); // Redirect to the issues page after submission
-            
+
         } catch (error) {
             setError('Failed to create issue. Please try again.'); // Set error message
         }
-            // Here you can handle the form submission, e.g., send data to an API
     })}>
-    
+
     <Flex direction="column" gap="3">
-	<Box maxWidth="200px">
-		<TextField.Root size="3" placeholder="Enter issue title" {...register("title")} />
-	</Box>
+    <Box maxWidth="200px">
+        <TextField.Root size="3" placeholder="Enter issue title" {...register("title")} />
+        {/* Now Text component is correctly imported */}
+        {errors.title && <Text color="red" as='p'size="2">{errors.title.message}</Text>}
+    </Box>
+
 
     <Box maxWidth="1000px">
-		<Controller
-			name="description"
-			control={control}
-			render={({ field }) => (
-				<SimpleMDE
-					{...field}
-					options={{
-						placeholder: "Add issue description"
-					}}
-				/>
-			)}
-		/>
-	</Box>
+        <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+                <SimpleMDE
+                    {...field}
+                    options={{
+                        placeholder: "Add issue description"
+                    }}
+                />
+            )}
+        />
+        {/* Add error display for description as well */}
+        {errors.description && <Text color="red" as='p' size="2">{errors.description.message}</Text>}
+    </Box>
     </Flex>
 
-    <Button mt="4">Submit  Issue</Button> 
+    <Button mt="4">Submit Issue</Button>
 
     </form>
     </div>
