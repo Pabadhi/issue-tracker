@@ -1,6 +1,8 @@
 'use client';
 import { TextField, TextArea, Box ,Flex,Button} from '@radix-ui/themes'; // Import TextArea
 import React from 'react';
+import SimpleMDE from "react-simplemde-editor";
+import "easymde/dist/easymde.min.css";
 
 const NewIssuePage = () => {
   return (
@@ -11,7 +13,11 @@ const NewIssuePage = () => {
 	</Box>
 
     <Box maxWidth="1000px">
-		<TextArea resize="vertical" size="3" placeholder="Add issue description" />
+		<SimpleMDE
+			options={{
+				placeholder: "Add issue description"
+			}}
+		/>
 	</Box>
     </Flex>
 
