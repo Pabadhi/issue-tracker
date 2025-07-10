@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'; // Correct import for useRouter
 import {zodResolver} from '@hookform/resolvers/zod';
 import { createIssueSchema } from '@/app/api/issues/validation'; // Import the validation schema
 import { z } from 'zod'; // Import zod for validation schema
+import ErrorMessage from '@/app/components/ErrorMessage';
 // Import SimpleMDE styles
 
 type IssueForm = z.infer<typeof createIssueSchema>; // Define the form type based on the schema
@@ -43,8 +44,8 @@ const NewIssuePage = () => {
     <Flex direction="column" gap="3">
     <Box maxWidth="200px">
         <TextField.Root size="3" placeholder="Enter issue title" {...register("title")} />
-        {/* Now Text component is correctly imported */}
-        {errors.title && <Text color="red" as='p'size="2">{errors.title.message}</Text>}
+        
+        <ErrorMessage>{errors.title?.message}</ErrorMessage>
     </Box>
 
 
@@ -62,7 +63,7 @@ const NewIssuePage = () => {
             )}
         />
         {/* Add error display for description as well */}
-        {errors.description && <Text color="red" as='p' size="2">{errors.description.message}</Text>}
+        <ErrorMessage>{errors.description?.message}</ErrorMessage>
     </Box>
     </Flex>
 
